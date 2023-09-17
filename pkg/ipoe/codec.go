@@ -2,67 +2,84 @@
 package ipoe
 
 import (
-    "fmt"
-    "strings"
+	"fmt"
+	"strings"
+
+	b64 "encoding/base64"
 )
 
 const (
-    HeaderPrefix = "X-IPOE-"
-    StartDelimiter = "--- START IPOE ---\r\n"
-    EndDelimiter = "--- END IPOE --\r\n"
+	HeaderPrefix   = "X-IPOE-"
+	StartDelimiter = "--- START IPOE ---\r\n"
+	EndDelimiter   = "--- END IPOE --\r\n"
 )
-type Codec interface {
 
+type Codec interface {
+	Encode([]byte) string
+	Decode(string) ([]byte, error)
+}
+
+type Base64Codec struct {
+}
+
+func (b *Base64Codec) Encode(data []byte) string {
+
+	return b64.URLEncoding.EncodeToString(data)
+}
+
+func (b *Base64Codec) Decode(data string) ([]byte, error) {
+
+	return b64.URLEncoding.DecodeString(data)
 }
 
 type MailMessage struct {
-    Subject string
-    From string
-    Recipient []string
-    Body []byte
-    Headers map[string]string
+	Subject   string
+	From      string
+	Recipient []string
+	Body      []byte
+	Headers   map[string]string
 }
 
 func NewMailMessage(from, subject string) *MailMessage {
-    return &MailMessage{
-        Subject: subject,
-        From: from,
-        Recipient: []string{},
-        Body: nil,
-        Headers: map[string]string{},
-    }
+	return &MailMessage{
+		Subject:   subject,
+		From:      from,
+		Recipient: []string{},
+		Body:      nil,
+		Headers:   map[string]string{},
+	}
 }
 
 func (mm *MailMessage) AddHeader(hdr, value string) *MailMessage {
-    mm.Headers[fmt.Sprintf("%s%s", HeaderPrefix, hdr)] = value
-    return mm
+	mm.Headers[fmt.Sprintf("%s%s", HeaderPrefix, hdr)] = value
+	return mm
 }
 
-func (mm *MailMessage) ToData() string{
-    var builder strings.Builder
+func (mm *MailMessage) ToData() string {
+	var builder strings.Builder
 
-    builder.WriteString("Subject: ")
-    builder.WriteString(mm.Subject)
-    builder.WriteString("\r\n")
-    // TODO: BCC this?
-    builder.WriteString("To: ")
-    builder.WriteString(mm.Recipient[0])
-    builder.WriteString("\r\n")
-    for k,v := range mm.Headers {
-        builder.WriteString(k)
-        builder.WriteString(": ")
-        builder.WriteString(v)
-        builder.WriteString("\r\n")
-    }
-    builder.WriteString("\r\n")
-    builder.WriteString(StartDelimiter)
-    builder.Write(mm.Body)
-    builder.WriteString("\r\n")
-    builder.WriteString(EndDelimiter)
+	builder.WriteString("Subject: ")
+	builder.WriteString(mm.Subject)
+	builder.WriteString("\r\n")
+	// TODO: BCC this?
+	builder.WriteString("To: ")
+	builder.WriteString(mm.Recipient[0])
+	builder.WriteString("\r\n")
+	for k, v := range mm.Headers {
+		builder.WriteString(k)
+		builder.WriteString(": ")
+		builder.WriteString(v)
+		builder.WriteString("\r\n")
+	}
+	builder.WriteString("\r\n")
+	builder.WriteString(StartDelimiter)
+	builder.Write(mm.Body)
+	builder.WriteString("\r\n")
+	builder.WriteString(EndDelimiter)
 
-    // We may want to BCC to actual mail recipients
-    data := builder.String()
-    
-    fmt.Printf("DATA: %s", data)
-    return data
+	// We may want to BCC to actual mail recipients
+	data := builder.String()
+
+	fmt.Printf("DATA: %s", data)
+	return data
 }
