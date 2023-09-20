@@ -41,4 +41,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/emersion/go-imap/v2 v2.0.0-alpha.2.0.20230405203832-f798910da9d6 => /home/jdewald/Development/other/go-imap
+#replace github.com/emersion/go-imap/v2 v2.0.0-alpha.2.0.20230405203832-f798910da9d6 => /home/jdewald/Development/other/go-imap

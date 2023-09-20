@@ -6,6 +6,7 @@ something whacky.
 
 This effectively creates a Virtual Private Network (VPN) where the "Layer 2" is actual email.
 
+
 ## Architecture
 
 Strictly speaking, sending and receiving are two completely separate systems, but usually

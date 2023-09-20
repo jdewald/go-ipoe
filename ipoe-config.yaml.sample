@@ -1,0 +1,21 @@
+---
+smtp:
+  username: smptuser
+  server: smtp.gmail.com
+  password: PASSWORD
+  starttls: true
+  email: you@example.com
+
+imap:
+  username: you@example.com
+  password: PASSWORD
+  server: imap.gmail.com:993
+  # assumption is you have some filtering
+  # in place that moves emails to the appropriate
+  # folder. 
+  mailbox: IPOE-100644210
+
+routing:
+  destemail: you+ipoe@gmail.com
+  fromemail: you@gmail.com
+  
