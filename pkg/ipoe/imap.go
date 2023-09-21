@@ -4,11 +4,13 @@ package ipoe
 import (
 	"context"
 	"fmt"
-	"net"
 	"strings"
+    "net"
+_	"syscall"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
+	"github.com/songgao/water"
 	"golang.org/x/net/ipv4"
 
 	"log"
@@ -27,7 +29,7 @@ type IMAPReceiver struct {
 	Codec  Codec
 }
 
-func (ir *IMAPReceiver) Listen(ctx context.Context) {
+func (ir *IMAPReceiver) Listen(ctx context.Context, iface *water.Interface) {
 	config := ir.Config
 
 	haveMessages := make(chan uint32, 1)
@@ -83,7 +85,7 @@ func (ir *IMAPReceiver) Listen(ctx context.Context) {
 	}
 
 	// ipv4
-	//	ipv4fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
+//	ipv4fd, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_RAW, syscall.IPPROTO_RAW)
 
 	for {
 
@@ -132,10 +134,10 @@ func (ir *IMAPReceiver) Listen(ctx context.Context) {
 								fmt.Printf("Error decoded packet: %v", err)
 							} else {
 								if hdr, err := ipv4.ParseHeader(decoded); err == nil {
-									//									addr := syscall.SockaddrInet4{
-									//										Port: 0,
-									//										Addr: [4]byte{hdr.Dst[0], hdr.Dst[1], hdr.Dst[2], hdr.Dst[3]},
-									//									}
+//									addr := syscall.SockaddrInet4{
+//										Port: 0,
+//										Addr: [4]byte{hdr.Dst[0], hdr.Dst[1], hdr.Dst[2], hdr.Dst[3]},
+//									}
 
 									if conn, err := net.Dial(fmt.Sprintf("ip:%d", hdr.Protocol), hdr.Dst.String()); err == nil {
 										raw, err := ipv4.NewRawConn(conn.(net.PacketConn))
@@ -149,10 +151,11 @@ func (ir *IMAPReceiver) Listen(ctx context.Context) {
 									} else {
 										log.Fatalf("Unable to dial to %s:%v", hdr.Dst, err)
 									}
-									//									sendErr := syscall.Sendto(ipv4fd, decoded, 0, &addr)
-									//									if sendErr != nil {
-									//										log.Fatalf("Unable to send packet to %s:%v\n", hdr.Dst, sendErr)
-									//								}
+//									sendErr := syscall.Sendto(ipv4fd, decoded, 0, &addr)
+//									if sendErr != nil {
+//										log.Fatalf("Unable to send packet to %s:%v\n", hdr.Dst, sendErr)
+
+//									}
 								} else {
 									fmt.Printf("Unable to parse IP packet: %v", err)
 								}

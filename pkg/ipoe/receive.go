@@ -1,7 +1,11 @@
 package ipoe
 
-import "context"
+import (
+	"context"
+
+	"github.com/songgao/water"
+)
 
 type IPOEReciver interface {
-	Listen(ctx context.Context)
+	Listen(ctx context.Context, intf *water.Interface)
 }

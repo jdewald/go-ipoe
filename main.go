@@ -51,13 +51,19 @@ func BindInterface(name string) *water.Interface {
 
 func ListenPackets(ctx context.Context, intf *water.Interface, sender *ipoe.DefaultSMTPSender) {
 
-	payload := make([]byte, 9000)
+	_payload := make([]byte, 9000)
 	for {
-		n, err := intf.Read(payload)
+		n, err := intf.Read(_payload)
+
+		payload := _payload[:n]
+		if intf.IsTAP() {
+			payload = payload[14:] // ethernet without q-in-q
+
+		}
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("Packet received of %d bytes\n", n)
+		log.Printf("Packet received of %d/%d bytes\n", len(payload), n)
 		version := int(payload[0] >> 4)
 		if version == 4 {
 
@@ -73,7 +79,7 @@ func ListenPackets(ctx context.Context, intf *water.Interface, sender *ipoe.Defa
 		} else {
 			packet, err := ipv6.ParseHeader(payload)
 			if err != nil {
-				log.Fatalf("Unable to parse packet: %v", err)
+				log.Fatalf("Unable to parse V6 packet: %v", err)
 			}
 			log.Printf("%s -> %s (%d)\n", packet.Src, packet.Dst, packet.NextHeader)
 		}
@@ -81,8 +87,8 @@ func ListenPackets(ctx context.Context, intf *water.Interface, sender *ipoe.Defa
 
 }
 
-func ListenRemote(ctx context.Context, receiver ipoe.IPOEReciver) {
-	receiver.Listen(ctx)
+func ListenRemote(ctx context.Context, receiver ipoe.IPOEReciver, intf *water.Interface) {
+	receiver.Listen(ctx, intf)
 
 }
 func main() {
@@ -153,7 +159,7 @@ func main() {
 
 	// Packets we receive from remote. Note
 	// that this is essentially unrelated to the send side
-	go ListenRemote(ctx, &ipoe.IMAPReceiver{Config: receiverConfig, Codec: b64Codec})
+	go ListenRemote(ctx, &ipoe.IMAPReceiver{Config: receiverConfig, Codec: b64Codec}, intf)
 
 	<-done
 	fmt.Println("Goodbye!")
