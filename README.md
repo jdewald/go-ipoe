@@ -4,7 +4,7 @@ Yes, exactly what it sounds like. Let's suppose you're in a heavily locked down 
 the only external system you can talk to is an email provider. Or, you just want to do
 something whacky.
 
-This effectively creates a Virtual Private Network (VPN) where the "Layer 2" is actual email.
+This effectively creates a tunnel where the "Layer 2" is actual email.
 
 
 ## Architecture
